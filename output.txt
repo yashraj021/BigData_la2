@@ -1,0 +1,23 @@
+# Compile program
+$HADOOP_HOME/bin/hadoop  com.sun.tools.javac.Main ~/docker-hadoop/Counter.java -d ~/docker-hadoop/build/
+
+# Create jar
+jar -cvf ~/docker-hadoop/Counter.jar .
+
+# Copy jar file into docker namenode process
+docker cp ~/docker-hadoop/build/Counter.jar 9c673589c50f:Counter.jar
+
+# Open namenode bash shell
+docker exec -it namenode bashnamenode bash
+
+root@9c673589c50f:/# hdfs dfs -mkdir -p input
+root@9c673589c50f:/# hdfs dfs -mkdir -p output
+# Copy input csv
+root@9c673589c50f:/# hdfs dfs -put ~/docker-hadoop/data.csv ~/input
+# Run jar inside docker bash shell
+root@9c673589c50f:/# hadoop jar ./Counter.jar  com.yatan.yash.Counter ~/input.csv ~/output
+
+root@9c673589c50f:/# hdfs dfs -cat ~/output/part*
+Number of Students having score in subject 1 > 60:  11
+Passed Students:  16
+
